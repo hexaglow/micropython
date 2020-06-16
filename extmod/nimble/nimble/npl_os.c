@@ -58,8 +58,13 @@ void *ble_npl_get_current_task_id(void) {
 
 // MP_STATE_PORT(bluetooth_nimble_memory) is a pointer to [next, prev, data...].
 
+volatile bool in_pendsv = false;
+
 // TODO: This is duplicated from mbedtls. Perhaps make this a generic feature?
 void *m_malloc_bluetooth(size_t size) {
+    if (in_pendsv) {
+        printf("m_malloc_bluetooth called from pendsv\n");
+    }
     void **ptr = m_malloc0(size + 2 * sizeof(uintptr_t));
     if (MP_STATE_PORT(bluetooth_nimble_memory) != NULL) {
         MP_STATE_PORT(bluetooth_nimble_memory)[0] = ptr;
@@ -71,6 +76,9 @@ void *m_malloc_bluetooth(size_t size) {
 }
 
 void m_free_bluetooth(void *ptr_in) {
+    if (in_pendsv) {
+        printf("m_free_bluetooth called from pendsv\n");
+    }
     void **ptr = &((void**)ptr_in)[-2];
     if (ptr[1] != NULL) {
         ((void**)ptr[1])[0] = ptr[0];

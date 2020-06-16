@@ -41,14 +41,20 @@
 extern void os_eventq_run_all(void);
 extern void os_callout_process(void);
 
+extern volatile bool in_pendsv;
+
 void mp_bluetooth_hci_poll(void) {
     if (mp_bluetooth_nimble_ble_state == MP_BLUETOOTH_NIMBLE_BLE_STATE_OFF) {
         return;
     }
 
+    in_pendsv = true;
+
     mp_bluetooth_nimble_hci_uart_process();
     os_callout_process();
     os_eventq_run_all();
+
+    in_pendsv = false;
 }
 
 void mp_bluetooth_nimble_port_preinit(void) {

@@ -56,11 +56,12 @@ class BLETemperature:
     def set_temperature(self, temp_deg_c, notify=False):
         # Data is sint16 in degrees Celsius with a resolution of 0.01 degrees Celsius.
         # Write the local value, ready for a central to read.
-        self._ble.gatts_write(self._handle, struct.pack("<h", int(temp_deg_c * 100)))
-        if notify:
-            for conn_handle in self._connections:
-                # Notify connected centrals to issue a read.
-                self._ble.gatts_notify(conn_handle, self._handle)
+        for i in range(3):
+            self._ble.gatts_write(self._handle, struct.pack("<h", int(temp_deg_c * 100 * (i+1))))
+            if notify:
+                for conn_handle in self._connections:
+                    # Notify connected centrals to issue a read.
+                    self._ble.gatts_notify(conn_handle, self._handle)
 
     def _advertise(self, interval_us=500000):
         self._ble.gap_advertise(interval_us, adv_data=self._payload)
@@ -73,13 +74,20 @@ def demo():
     t = 25
     i = 0
 
+    import gc
+
+    print(gc.mem_free())
+
     while True:
         # Write every second, notify every 10 seconds.
-        i = (i + 1) % 10
+        #i = (i + 1) % 10
         temp.set_temperature(t, notify=i == 0)
         # Random walk the temperature.
         t += random.uniform(-0.5, 0.5)
         time.sleep_ms(1000)
+
+        gc.collect()
+        print(gc.mem_free())
 
 
 if __name__ == "__main__":
