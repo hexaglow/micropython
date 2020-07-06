@@ -835,6 +835,11 @@ typedef double mp_float_t;
 #define MICROPY_PY_ASYNC_AWAIT (1)
 #endif
 
+// Support for assignment expressions with := (see PEP 572, Python 3.8+)
+#ifndef MICROPY_PY_ASSIGN_EXPR
+#define MICROPY_PY_ASSIGN_EXPR (1)
+#endif
+
 // Non-standard .pend_throw() method for generators, allowing for
 // Future-like behavior with respect to exception handling: an
 // exception set with .pend_throw() will activate on the next call
@@ -1126,6 +1131,21 @@ typedef double mp_float_t;
 // Whether to provide math.isclose function
 #ifndef MICROPY_PY_MATH_ISCLOSE
 #define MICROPY_PY_MATH_ISCLOSE (0)
+#endif
+
+// Whether to provide fix for atan2 Inf handling.
+#ifndef MICROPY_PY_MATH_ATAN2_FIX_INFNAN
+#define MICROPY_PY_MATH_ATAN2_FIX_INFNAN (0)
+#endif
+
+// Whether to provide fix for fmod Inf handling.
+#ifndef MICROPY_PY_MATH_FMOD_FIX_INFNAN
+#define MICROPY_PY_MATH_FMOD_FIX_INFNAN (0)
+#endif
+
+// Whether to provide fix for modf negative zero handling.
+#ifndef MICROPY_PY_MATH_MODF_FIX_NEGZERO
+#define MICROPY_PY_MATH_MODF_FIX_NEGZERO (0)
 #endif
 
 // Whether to provide "cmath" module
@@ -1447,6 +1467,10 @@ typedef double mp_float_t;
 
 #ifndef MICROPY_WRAP_MP_KEYBOARD_INTERRUPT
 #define MICROPY_WRAP_MP_KEYBOARD_INTERRUPT(f) f
+#endif
+
+#ifndef MICROPY_WRAP_MP_SCHED_SCHEDULE
+#define MICROPY_WRAP_MP_SCHED_SCHEDULE(f) f
 #endif
 
 /*****************************************************************************/

@@ -88,14 +88,19 @@ SRC_TINYUSB_IMX_C += \
 
 SRC_C = \
 	main.c \
+	led.c \
+	pin.c \
 	tusb_port.c \
 	board_init.c \
 	$(BOARD_DIR)/flash_config.c \
+	$(BOARD_DIR)/pins.c \
+	machine_led.c \
 	modutime.c \
 	modmachine.c \
 	mphalport.c \
 	lib/mp-readline/readline.c \
 	lib/libc/string0.c \
+	lib/utils/gchelper_native.c \
 	lib/utils/printf.c \
 	lib/utils/gchelper_cortexm.c \
 	lib/utils/pyexec.c \
@@ -108,7 +113,12 @@ SRC_SS = $(MCU_DIR)/gcc/startup_$(MCU_SERIES).S
 SRC_S = lib/utils/gchelper_m3.s \
 
 # List of sources for qstr extraction
-SRC_QSTR += modutime.c modmachine.c
+SRC_QSTR += \
+	machine_led.c \
+	modutime.c \
+	modmachine.c \
+	pin.c \
+	$(BOARD_DIR)/pins.c \
 
 OBJ += $(PY_O)
 OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o))

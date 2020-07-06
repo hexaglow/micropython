@@ -68,6 +68,11 @@
 
 #define MICROPY_PY_BUILTINS_STR_UNICODE (1)
 
+#if !(defined(MICROPY_GCREGS_SETJMP) || defined(__x86_64__) || defined(__i386__) || defined(__thumb2__) || defined(__thumb__) || defined(__arm__))
+// Fall back to setjmp() implementation for discovery of GC pointers in registers.
+#define MICROPY_GCREGS_SETJMP (1)
+#endif
+
 #define MICROPY_PY___FILE__         (0)
 #define MICROPY_PY_ARRAY            (0)
 #define MICROPY_PY_ATTRTUPLE        (0)

@@ -124,7 +124,7 @@ endif
 
 LDFLAGS = -nostdlib -L $(LD_DIR) $(addprefix -T,$(LD_FILES)) -Map=$(@:.elf=.map) --cref
 LDFLAGS += --defsym=_estack_reserve=8
-LIBS = $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
+LIBS = "$(shell $(CC) $(CFLAGS) -print-libgcc-file-name)"
 
 # Remove uncalled code from the final image.
 CFLAGS += -fdata-sections -ffunction-sections
@@ -141,13 +141,14 @@ endif
 # Options for mpy-cross
 MPY_CROSS_FLAGS += -march=armv7m
 
-SRC_LIB = $(addprefix lib/,\
+LIB_SRC_C = $(addprefix lib/,\
 	libc/string0.c \
 	mp-readline/readline.c \
 	netutils/netutils.c \
 	netutils/trace.c \
 	netutils/dhcpserver.c \
 	timeutils/timeutils.c \
+	utils/gchelper_native.c \
 	utils/pyexec.c \
 	utils/interrupt_char.c \
 	utils/sys_stdio_mphal.c \
@@ -156,7 +157,7 @@ SRC_LIB = $(addprefix lib/,\
 	)
 
 ifeq ($(MICROPY_FLOAT_IMPL),double)
-SRC_LIBM = $(addprefix lib/libm_dbl/,\
+LIBM_SRC_C = $(addprefix lib/libm_dbl/,\
 	__cos.c \
 	__expo2.c \
 	__fpclassify.c \
@@ -200,12 +201,12 @@ SRC_LIBM = $(addprefix lib/libm_dbl/,\
 	trunc.c \
 	)
 ifeq ($(SUPPORTS_HARDWARE_FP_DOUBLE),1)
-SRC_LIBM += lib/libm_dbl/thumb_vfp_sqrt.c
+LIBM_SRC_C += lib/libm_dbl/thumb_vfp_sqrt.c
 else
-SRC_LIBM += lib/libm_dbl/sqrt.c
+LIBM_SRC_C += lib/libm_dbl/sqrt.c
 endif
 else
-SRC_LIBM = $(addprefix lib/libm/,\
+LIBM_SRC_C = $(addprefix lib/libm/,\
 	math.c \
 	acoshf.c \
 	asinfacosf.c \
@@ -234,13 +235,13 @@ SRC_LIBM = $(addprefix lib/libm/,\
 	wf_tgamma.c \
 	)
 ifeq ($(SUPPORTS_HARDWARE_FP_SINGLE),1)
-SRC_LIBM += lib/libm/thumb_vfp_sqrtf.c
+LIBM_SRC_C += lib/libm/thumb_vfp_sqrtf.c
 else
-SRC_LIBM += lib/libm/ef_sqrt.c
+LIBM_SRC_C += lib/libm/ef_sqrt.c
 endif
 endif
 
-LIBM_O = $(addprefix $(BUILD)/, $(SRC_LIBM:.c=.o))
+LIBM_O = $(addprefix $(BUILD)/, $(LIBM_SRC_C:.c=.o))
 
 # Too many warnings in libm_dbl, disable for now.
 ifeq ($(MICROPY_FLOAT_IMPL),double)
@@ -502,7 +503,7 @@ endif
 
 OBJ =
 OBJ += $(PY_O)
-OBJ += $(addprefix $(BUILD)/, $(SRC_LIB:.c=.o))
+OBJ += $(addprefix $(BUILD)/, $(LIB_SRC_C:.c=.o))
 OBJ += $(LIBM_O)
 OBJ += $(addprefix $(BUILD)/, $(EXTMOD_SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(DRIVERS_SRC_C:.c=.o))
@@ -640,7 +641,7 @@ GEN_CDCINF_FILE = $(HEADER_BUILD)/pybcdc.inf
 GEN_CDCINF_HEADER = $(HEADER_BUILD)/pybcdc_inf.h
 
 # List of sources for qstr extraction
-SRC_QSTR += $(SRC_C) $(SRC_MOD) $(SRC_LIB) $(EXTMOD_SRC_C)
+SRC_QSTR += $(SRC_C) $(SRC_MOD) $(LIB_SRC_C) $(EXTMOD_SRC_C)
 # Append any auto-generated sources that are needed by sources listed in
 # SRC_QSTR
 SRC_QSTR_AUTO_DEPS += $(GEN_CDCINF_HEADER)

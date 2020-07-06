@@ -28,7 +28,6 @@
 
 #include "py/mpstate.h"
 #include "py/gc.h"
-
 #include "lib/utils/gchelper.h"
 
 #if MICROPY_ENABLE_GC
@@ -43,7 +42,7 @@
 // stack already by the caller.
 #if defined(__x86_64__)
 
-STATIC void gc_helper_get_regs(regs_t arr) {
+STATIC void gc_helper_get_regs(gc_helper_regs_t arr) {
     register long rbx asm ("rbx");
     register long rbp asm ("rbp");
     register long r12 asm ("r12");
@@ -74,7 +73,7 @@ STATIC void gc_helper_get_regs(regs_t arr) {
 
 #elif defined(__i386__)
 
-STATIC void gc_helper_get_regs(regs_t arr) {
+STATIC void gc_helper_get_regs(gc_helper_regs_t arr) {
     register long ebx asm ("ebx");
     register long esi asm ("esi");
     register long edi asm ("edi");
@@ -101,7 +100,7 @@ STATIC void gc_helper_get_regs(regs_t arr) {
 
 // Fallback implementation, prefer gchelper_m0.s or gchelper_m3.s
 
-STATIC void gc_helper_get_regs(regs_t arr) {
+STATIC void gc_helper_get_regs(gc_helper_regs_t arr) {
     register long r4 asm ("r4");
     register long r5 asm ("r5");
     register long r6 asm ("r6");
@@ -135,7 +134,7 @@ STATIC void gc_helper_get_regs(regs_t arr) {
 // Even if we have specific support for an architecture, it is
 // possible to force use of setjmp-based implementation.
 
-STATIC void gc_helper_get_regs(regs_t arr) {
+STATIC void gc_helper_get_regs(gc_helper_regs_t arr) {
     setjmp(arr);
 }
 
@@ -147,7 +146,7 @@ STATIC void gc_helper_get_regs(regs_t arr) {
 // layout where regs is lower on the stack than pointers which have
 // just been allocated but not yet marked, and get incorrectly sweeped.
 MP_NOINLINE void gc_helper_collect_regs_and_stack(void) {
-    regs_t regs;
+    gc_helper_regs_t regs;
     gc_helper_get_regs(regs);
     // GC stack (and regs because we captured them)
     void **regs_ptr = (void **)(void *)&regs;

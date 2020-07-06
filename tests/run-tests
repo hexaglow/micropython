@@ -56,6 +56,7 @@ def run_micropython(pyb, args, test_file, is_special=False):
     special_tests = (
         'micropython/meminfo.py', 'basics/bytes_compare3.py',
         'basics/builtin_help.py', 'thread/thread_exc2.py',
+        'esp32/partition_ota.py',
     )
     had_crash = False
     if pyb is None:
@@ -211,6 +212,9 @@ def run_micropython(pyb, args, test_file, is_special=False):
 
 
 def run_feature_check(pyb, args, base_path, test_file):
+    if pyb is not None and test_file.startswith("repl_"):
+        # REPL feature tests will not run via pyboard because they require prompt interactivity
+        return b""
     return run_micropython(pyb, args, base_path + "/feature_check/" + test_file, is_special=True)
 
 
@@ -351,6 +355,7 @@ def run_tests(pyb, tests, args, base_path="."):
     if not has_complex:
         skip_tests.add('float/complex1.py')
         skip_tests.add('float/complex1_intbig.py')
+        skip_tests.add('float/complex_special_mehods.py')
         skip_tests.add('float/int_big_float.py')
         skip_tests.add('float/true_value.py')
         skip_tests.add('float/types.py')
@@ -410,6 +415,7 @@ def run_tests(pyb, tests, args, base_path="."):
         skip_tests.update({'basics/%s.py' % t for t in 'gen_yield_from_close generator_name'.split()}) # require raise_varargs, generator name
         skip_tests.update({'basics/async_%s.py' % t for t in 'with with2 with_break with_return'.split()}) # require async_with
         skip_tests.update({'basics/%s.py' % t for t in 'try_reraise try_reraise2'.split()}) # require raise_varargs
+        skip_tests.add('basics/annotate_var.py') # requires checking for unbound local
         skip_tests.add('basics/del_deref.py') # requires checking for unbound local
         skip_tests.add('basics/del_local.py') # requires checking for unbound local
         skip_tests.add('basics/exception_chain.py') # raise from is not supported

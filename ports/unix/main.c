@@ -657,7 +657,7 @@ MP_NOINLINE int main_(int argc, char **argv) {
         inspect = true;
     }
     if (ret == NOTHING_EXECUTED || inspect) {
-        if (isatty(0)) {
+        if (isatty(0) || inspect) {
             prompt_read_history();
             ret = do_repl();
             prompt_write_history();
@@ -681,6 +681,11 @@ MP_NOINLINE int main_(int argc, char **argv) {
     if (mp_verbose_flag) {
         mp_micropython_mem_info(0, NULL);
     }
+    #endif
+
+    #if MICROPY_PY_BLUETOOTH
+    void mp_bluetooth_deinit(void);
+    mp_bluetooth_deinit();
     #endif
 
     #if MICROPY_PY_THREAD

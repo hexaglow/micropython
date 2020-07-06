@@ -126,7 +126,7 @@ APP_UTIL_SRC_C = $(addprefix util/,\
 	)
 
 APP_UTIL_SRC_S = $(addprefix util/,\
-	cortex_sp_m3.s \
+	cortex_m3_get_sp.s \
 	sleeprestore.s \
 	)
 
@@ -144,7 +144,7 @@ APP_LIB_SRC_C = $(addprefix lib/,\
 	mp-readline/readline.c \
 	netutils/netutils.c \
 	timeutils/timeutils.c \
-	utils/gchelper_cortexm.c \
+	utils/gchelper_native.c \
 	utils/pyexec.c \
 	utils/interrupt_char.c \
 	utils/sys_stdio_mphal.c \

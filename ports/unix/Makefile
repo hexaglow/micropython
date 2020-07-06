@@ -14,7 +14,7 @@ include ../../py/mkenv.mk
 include $(VARIANT_DIR)/mpconfigvariant.mk
 
 # use FROZEN_MANIFEST for new projects, others are legacy
-FROZEN_MANIFEST ?= manifest.py
+FROZEN_MANIFEST ?= variants/manifest.py
 FROZEN_DIR =
 FROZEN_MPY_DIR =
 
@@ -31,7 +31,7 @@ UNAME_S := $(shell uname -s)
 # include py core make definitions
 include $(TOP)/py/py.mk
 
-GIT_SUBMODULES = lib/axtls lib/berkeley-db-1.xx lib/libffi
+GIT_SUBMODULES += lib/axtls lib/berkeley-db-1.xx lib/libffi
 
 INC +=  -I.
 INC +=  -I$(TOP)
@@ -132,6 +132,28 @@ CFLAGS_MOD += -DMICROPY_PY_THREAD=1 -DMICROPY_PY_THREAD_GIL=0
 LDFLAGS_MOD += $(LIBPTHREAD)
 endif
 
+# If the variant enables it and we have libusb, enable BTStack support for USB adaptors.
+ifeq ($(MICROPY_PY_BLUETOOTH),1)
+
+HAVE_LIBUSB := $(shell (which pkg-config > /dev/null && pkg-config --exists libusb-1.0) 2>/dev/null && echo '1')
+ifeq ($(HAVE_LIBUSB),1)
+
+CFLAGS_MOD += -DMICROPY_PY_BLUETOOTH=1
+CFLAGS_MOD += -DMICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE=1
+CFLAGS_MOD += -DMICROPY_PY_BLUETOOTH_GATTS_ON_READ_CALLBACK=1
+
+MICROPY_BLUETOOTH_BTSTACK ?= 1
+MICROPY_BLUETOOTH_BTSTACK_USB ?= 1
+
+ifeq ($(MICROPY_BLUETOOTH_BTSTACK),1)
+GIT_SUBMODULES += lib/btstack
+
+include $(TOP)/extmod/btstack/btstack.mk
+endif
+
+endif
+endif
+
 ifeq ($(MICROPY_PY_FFI),1)
 
 ifeq ($(MICROPY_STANDALONE),1)
@@ -176,10 +198,11 @@ SRC_C = \
 	alloc.c \
 	coverage.c \
 	fatfs_port.c \
+	btstack_usb.c \
 	$(SRC_MOD) \
 	$(wildcard $(VARIANT_DIR)/*.c)
 
-LIB_SRC_C = $(addprefix lib/,\
+LIB_SRC_C += $(addprefix lib/,\
 	$(LIB_SRC_C_EXTRA) \
 	timeutils/timeutils.c \
 	utils/gchelper_generic.c \
@@ -188,9 +211,10 @@ LIB_SRC_C = $(addprefix lib/,\
 OBJ = $(PY_O)
 OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(LIB_SRC_C:.c=.o))
+OBJ += $(addprefix $(BUILD)/, $(EXTMOD_SRC_C:.c=.o))
 
 # List of sources for qstr extraction
-SRC_QSTR += $(SRC_C) $(LIB_SRC_C)
+SRC_QSTR += $(SRC_C) $(LIB_SRC_C) $(EXTMOD_SRC_C)
 # Append any auto-generated sources that are needed by sources listed in
 # SRC_QSTR
 SRC_QSTR_AUTO_DEPS +=

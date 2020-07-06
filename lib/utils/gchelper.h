@@ -30,15 +30,16 @@
 
 #if MICROPY_GCREGS_SETJMP
 #include <setjmp.h>
-typedef jmp_buf regs_t;
+
+typedef jmp_buf gc_helper_regs_t;
 #else
 
 #if defined(__x86_64__)
-typedef uintptr_t regs_t[6];
+typedef uintptr_t gc_helper_regs_t[6];
 #elif defined(__i386__)
-typedef uintptr_t regs_t[4];
+typedef uintptr_t gc_helper_regs_t[4];
 #elif defined(__thumb2__) || defined(__thumb__) || defined(__arm__)
-typedef uintptr_t regs_t[10];
+typedef uintptr_t gc_helper_regs_t[10];
 #endif
 
 #endif

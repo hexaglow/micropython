@@ -41,6 +41,7 @@ void gc_collect(void) {
     // start the GC
     gc_collect_start();
 
+    // trace the stack and the registers
     gc_helper_collect_regs_and_stack();
 
     // trace root pointers from any threads
